@@ -1,5 +1,8 @@
 using EnterpriseOperations.Application.Interfaces;
 using EnterpriseOperations.Application.Services;
+using EnterpriseOperations.Infrastructure.Repositories;
+using EnterpriseOperations.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,10 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IOperationTaskService, OperationTaskService>();
+
+builder.Services.AddScoped<IOperationTaskRepository, OperationTaskRepository>();
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

@@ -8,30 +8,26 @@ namespace EnterpriseOperations.Application.Services
 {
     public class OperationTaskService : IOperationTaskService
     {
-        public Task<IEnumerable<OperationTaskDto>> GetAllAsync() 
-        {
-            var tasks = new List<OperationTaskDto>
-            {
-                new()
-                {
-                    Id = 1,
-                    Title = "Review external system integration",
-                    Description = "Check whether the external API integration is responding correctly.",
-                    IsCompleted = false,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new()
-                {
-                    Id = 2,
-                    Title = "Prepare monthly operations report",
-                    Description = "Generate a report for operational performance review.",
-                    IsCompleted = true,
-                    CreatedAt = DateTime.UtcNow.AddDays(-2),
-                    CompletedAt = DateTime.UtcNow.AddDays(-1)
-                }
-            };
+        private readonly IOperationTaskRepository _operationTaskRepository;
 
-            return Task.FromResult<IEnumerable<OperationTaskDto>>(tasks);
+        public OperationTaskService(IOperationTaskRepository operationTaskRepository) 
+        {
+            _operationTaskRepository = operationTaskRepository;
+        }
+
+        public async Task<IEnumerable<OperationTaskDto>> GetAllAsync()
+        {
+            var tasks = await _operationTaskRepository.GetAllAsync();
+
+            return tasks.Select(task => new OperationTaskDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                IsCompleted = task.IsCompleted,
+                CreatedAt = task.CreatedAt,
+                CompletedAt = task.CompletedAt
+            });
         }
     }
 }
