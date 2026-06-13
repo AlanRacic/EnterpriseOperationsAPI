@@ -23,5 +23,20 @@ namespace EnterpriseOperations.Infrastructure.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<OperationTask?> GetByIdAsync(int id) 
+        {
+            return await _context.OperationTasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(task => task.Id == id);
+        }
+
+        public async Task<OperationTask> AddAsync(OperationTask operationTask) 
+        {
+            await _context.OperationTasks.AddAsync(operationTask);
+            await _context.SaveChangesAsync();
+
+            return operationTask;
+        }
     }
 }

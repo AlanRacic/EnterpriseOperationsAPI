@@ -1,4 +1,5 @@
-﻿using EnterpriseOperations.Application.Interfaces;
+﻿using EnterpriseOperations.Application.DTOs;
+using EnterpriseOperations.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,30 @@ namespace EnterpriseOperations.API.Controllers
             var tasks = await _operationTaskService.GetAllAsync();
 
             return Ok(tasks);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id) 
+        {
+            var task = await _operationTaskService.GetByIdAsync(id);
+
+            if (task is null) 
+            {
+                return NotFound();
+            }
+
+            return Ok(task);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateOperationTaskDto dto)
+        {
+            var createdTask = await _operationTaskService.CreateAsync(dto);
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new {id=createdTask.Id},
+                createdTask);
         }
     }
 }

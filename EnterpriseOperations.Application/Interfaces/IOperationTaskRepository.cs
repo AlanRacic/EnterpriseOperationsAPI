@@ -8,5 +8,9 @@ namespace EnterpriseOperations.Application.Interfaces
     public interface IOperationTaskRepository
     {
         Task<IEnumerable<OperationTask>> GetAllAsync();
+
+        Task<OperationTask?> GetByIdAsync(int id);
+
+        Task<OperationTask> AddAsync(OperationTask operationTask);
     }
 }

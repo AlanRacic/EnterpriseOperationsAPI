@@ -1,5 +1,6 @@
 ﻿using EnterpriseOperations.Application.Interfaces;
 using EnterpriseOperations.Application.DTOs;
+using EnterpriseOperations.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +20,39 @@ namespace EnterpriseOperations.Application.Services
         {
             var tasks = await _operationTaskRepository.GetAllAsync();
 
-            return tasks.Select(task => new OperationTaskDto
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<OperationTaskDto?> GetByIdAsync(int id)
+        {
+            var task = await _operationTaskRepository.GetByIdAsync(id);
+
+            if (task is null)
+            {
+                return null;
+            }
+
+            return MapToDto(task);
+        }
+
+        public async Task<OperationTaskDto> CreateAsync(CreateOperationTaskDto dto)
+        {
+            var operationTask = new OperationTask
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                IsCompleted = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createdTask = await _operationTaskRepository.AddAsync(operationTask);
+
+            return MapToDto(createdTask);
+        }
+
+        private static OperationTaskDto MapToDto(OperationTask task) 
+        {
+            return new OperationTaskDto
             {
                 Id = task.Id,
                 Title = task.Title,
@@ -27,7 +60,7 @@ namespace EnterpriseOperations.Application.Services
                 IsCompleted = task.IsCompleted,
                 CreatedAt = task.CreatedAt,
                 CompletedAt = task.CompletedAt
-            });
+            };
         }
     }
 }
