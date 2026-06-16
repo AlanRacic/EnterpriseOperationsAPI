@@ -1,5 +1,6 @@
 ﻿using EnterpriseOperations.Application.DTOs;
 using EnterpriseOperations.Application.Interfaces;
+using EnterpriseOperations.Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,14 @@ namespace EnterpriseOperations.API.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged([FromQuery] OperationTaskQueryParameters queryParameters)
+        {
+            var result = await _operationTaskService.GetPagedAsync(queryParameters);
+
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) 
         {
@@ -46,6 +55,32 @@ namespace EnterpriseOperations.API.Controllers
                 nameof(GetById),
                 new {id=createdTask.Id},
                 createdTask);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, UpdateOperationTaskDto dto) 
+        {
+            var updated = await _operationTaskService.UpdateAsync(id, dto);
+
+            if (!updated) 
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id) 
+        {
+            var deleted = await _operationTaskService.DeleteAsync(id);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }

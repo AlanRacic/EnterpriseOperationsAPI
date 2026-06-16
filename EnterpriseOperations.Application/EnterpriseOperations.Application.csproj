@@ -10,8 +10,4 @@
     <ProjectReference Include="..\EnterpriseOperations.Domain\EnterpriseOperations.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 </Project>
