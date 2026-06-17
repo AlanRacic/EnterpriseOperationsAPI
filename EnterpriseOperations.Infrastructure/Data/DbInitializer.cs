@@ -17,38 +17,49 @@ namespace EnterpriseOperations.Infrastructure.Data
                 return;
             }
 
-            var operationTasks = new List<OperationTask>
+            var operationTasks = new List<OperationTask>();
+
+            var titles = new[]
             {
-                new() 
-                {
-                    Title = "Review external system integration",
-                    Description = "Check whether the external API integration is repsonding correctly.",
-                    IsCompleted = false,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new()
-                {
-                    Title = "Prepare monthly operations report",
-                    Description = "Generate a report for operational performance review.",
-                    IsCompleted = false,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new()
-                {
-                    Title = "Verify data syncronization",
-                    Description = "Validate that data from the external system is syncronized correctly.",
-                    IsCompleted = false,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new()
-                {
-                    Title = "Archive completed operation logs",
-                    Description = "Move old completed operation logs to archive storage.",
-                    IsCompleted = true,
-                    CreatedAt = DateTime.UtcNow.AddDays(-3),
-                    CompletedAt = DateTime.UtcNow.AddDays(-1)
-                }
+                "Review external system integration",
+                "Prepare monthly operations report",
+                "Verify data synchronization",
+                "Archive completed operation logs",
+                "Investigate delayed API response",
+                "Validate customer import process",
+                "Check background job status",
+                "Review failed payment synchronization",
+                "Analyze performance report",
+                "Prepare data quality summary"
             };
+
+            var descriptions = new[]
+            {
+                "Check whether the external API integration is responding correctly.",
+                "Generate a report for operational performance review.",
+                "Validate that data from the external system is synchronized correctly.",
+                "Move old completed operation logs to archive storage.",
+                "Analyze why the external integration sometimes responds slowly.",
+                "Verify that imported customer records match the expected format.",
+                "Review whether scheduled background jobs completed successfully.",
+                "Investigate why payment data was not synchronized.",
+                "Analyze response times and identify potential bottlenecks.",
+                "Prepare a summary of data quality issues for review."
+            };
+
+            for (int i = 1; i < 150; i++)
+            {
+                var isCompleted = i % 3 == 0;
+
+                operationTasks.Add(new OperationTask
+                {
+                    Title = $"{titles[i % titles.Length]} #{i}",
+                    Description = descriptions[i % descriptions.Length],
+                    IsCompleted = isCompleted,
+                    CreatedAt = DateTime.UtcNow.AddDays(-i),
+                    CompletedAt = isCompleted ? DateTime.UtcNow.AddDays(-i + 1) : null
+                });
+            }
 
             await context.OperationTasks.AddRangeAsync(operationTasks);
             await context.SaveChangesAsync();

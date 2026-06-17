@@ -11,5 +11,12 @@ namespace EnterpriseOperations.Infrastructure.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<OperationTask> OperationTasks => Set<OperationTask>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder) 
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
