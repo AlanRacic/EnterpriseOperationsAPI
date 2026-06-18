@@ -12,9 +12,14 @@ namespace EnterpriseOperations.Application.Services
     {
         private readonly IOperationTaskRepository _operationTaskRepository;
 
-        public OperationTaskService(IOperationTaskRepository operationTaskRepository) 
+        private readonly ICacheService _cacheService;
+
+        public OperationTaskService(
+            IOperationTaskRepository operationTaskRepository,
+            ICacheService cacheService) 
         {
             _operationTaskRepository = operationTaskRepository;
+            _cacheService = cacheService;
         }
 
         public async Task<IEnumerable<OperationTaskDto>> GetAllAsync()
@@ -85,15 +90,38 @@ namespace EnterpriseOperations.Application.Services
 
         public async Task<PagedResult<OperationTaskDto>> GetPagedAsync(OperationTaskQueryParameters queryParameters)
         {
+            var cacheKey =
+                $"operation-tasks:paged:" +
+                $"pageNumber={queryParameters.PageNumber}:" +
+                $"pageSize={queryParameters.PageSize}:" +
+                $"isCompleted={queryParameters.IsCompleted}:" +
+                $"searchTerm={queryParameters.SearchTerm}:" +
+                $"sortBy={queryParameters.SortBy}:" +
+                $"sortDirection={queryParameters.SortDirection}";
+
+            var cachedResult = await _cacheService.GetAsync<PagedResult<OperationTaskDto>>(cacheKey);
+
+            if (cachedResult is not null)
+            {
+                return cachedResult;
+            }
+
             var pagedTasks = await _operationTaskRepository.GetPagedAsync(queryParameters);
 
-            return new PagedResult<OperationTaskDto>
+            var result = new PagedResult<OperationTaskDto>
             {
                 Items = pagedTasks.Items.Select(MapToDto),
                 PageNumber = pagedTasks.PageNumber,
                 PageSize = pagedTasks.PageSize,
                 TotalCount = pagedTasks.TotalCount
             };
+
+            await _cacheService.SetAsync(
+                cacheKey,
+                result,
+                TimeSpan.FromMinutes(1));
+
+            return result;
         }
     }
 }
