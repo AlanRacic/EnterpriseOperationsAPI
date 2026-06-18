@@ -11,5 +11,9 @@ namespace EnterpriseOperations.Application.Interfaces
         Task SetAsync<T>(string key, T value, TimeSpan expiration);
 
         Task RemoveAsync(string key);
+
+        Task<int> GetVersionAsync(string key);
+
+        Task IncrementVersionAsync(string key);
     }
 }

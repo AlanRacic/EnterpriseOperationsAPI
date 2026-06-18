@@ -10,6 +10,8 @@ namespace EnterpriseOperations.Application.Services
 {
     public class OperationTaskService : IOperationTaskService
     {
+        private const string OperationTasksCacheVersionKey = "operation-tasks:version";
+
         private readonly IOperationTaskRepository _operationTaskRepository;
 
         private readonly ICacheService _cacheService;
@@ -53,6 +55,8 @@ namespace EnterpriseOperations.Application.Services
 
             var createdTask = await _operationTaskRepository.AddAsync(operationTask);
 
+            await _cacheService.IncrementVersionAsync(OperationTasksCacheVersionKey);
+
             return MapToDto(createdTask);
         }
 
@@ -67,12 +71,26 @@ namespace EnterpriseOperations.Application.Services
                 CompletedAt = dto.IsCompleted ? DateTime.UtcNow : null
             };
 
-            return await _operationTaskRepository.UpdateAsync(operationTask);
+            var updated = await _operationTaskRepository.UpdateAsync(operationTask);
+
+            if (updated) 
+            {
+                await _cacheService.IncrementVersionAsync(OperationTasksCacheVersionKey);
+            }
+
+            return updated;
         }
 
         public async Task<bool> DeleteAsync(int id) 
         {
-            return await _operationTaskRepository.DeleteAsync(id);
+            var deleted = await _operationTaskRepository.DeleteAsync(id);
+
+            if (deleted) 
+            {
+                await _cacheService.IncrementVersionAsync(OperationTasksCacheVersionKey);
+            }
+
+            return deleted;
         }
 
         private static OperationTaskDto MapToDto(OperationTask task) 
@@ -90,8 +108,10 @@ namespace EnterpriseOperations.Application.Services
 
         public async Task<PagedResult<OperationTaskDto>> GetPagedAsync(OperationTaskQueryParameters queryParameters)
         {
+            var cacheVersion = await _cacheService.GetVersionAsync(OperationTasksCacheVersionKey);
+
             var cacheKey =
-                $"operation-tasks:paged:" +
+                $"operation-tasks:paged:v{cacheVersion}:" +
                 $"pageNumber={queryParameters.PageNumber}:" +
                 $"pageSize={queryParameters.PageSize}:" +
                 $"isCompleted={queryParameters.IsCompleted}:" +

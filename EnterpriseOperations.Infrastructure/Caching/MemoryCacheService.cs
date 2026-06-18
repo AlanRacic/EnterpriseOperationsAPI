@@ -35,5 +35,30 @@ namespace EnterpriseOperations.Infrastructure.Caching
 
             return Task.CompletedTask;
         }
+
+        public Task<int> GetVersionAsync(string key) 
+        {
+            if (!_memoryCache.TryGetValue(key, out int version)) 
+            {
+                version = 1;
+                _memoryCache.Set(key, version);
+            }
+
+            return Task.FromResult(version);
+        }
+
+        public Task IncrementVersionAsync(string key) 
+        {
+            var currentVersion = 1;
+
+            if (_memoryCache.TryGetValue(key, out int existingVersion)) 
+            {
+                currentVersion = existingVersion;
+            }
+
+            _memoryCache.Set(key, currentVersion + 1);
+
+            return Task.CompletedTask;
+        }
     }
 }
