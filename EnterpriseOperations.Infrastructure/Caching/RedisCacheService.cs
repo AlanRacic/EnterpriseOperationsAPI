@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using EnterpriseOperations.Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,10 +11,12 @@ namespace EnterpriseOperations.Infrastructure.Caching
     public class RedisCacheService : ICacheService
     {
         private readonly IDistributedCache _distributedCache;
+        private readonly IConnectionMultiplexer _connectionMultiplexer;
 
-        public RedisCacheService(IDistributedCache distributedCache) 
+        public RedisCacheService(IDistributedCache distributedCache, IConnectionMultiplexer connectionMultiplexer) 
         {
             _distributedCache = distributedCache;
+            _connectionMultiplexer = connectionMultiplexer;
         }
 
         public async Task<T?> GetAsync<T>(string key) 
@@ -60,9 +63,9 @@ namespace EnterpriseOperations.Infrastructure.Caching
 
         public async Task IncrementVersionAsync(string key) 
         {
-            var currentVersion = await GetVersionAsync(key);
+            var database = _connectionMultiplexer.GetDatabase();
 
-            await _distributedCache.SetStringAsync(key, (currentVersion + 1).ToString());
+            await database.StringIncrementAsync(key);
         }
     }
 }

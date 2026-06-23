@@ -3,6 +3,7 @@ using EnterpriseOperations.Application.Services;
 using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Caching;
+using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,11 @@ builder.Services.AddScoped<IOperationTaskRepository, OperationTaskRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddStackExchangeRedisCache(options => options.Configuration = builder.Configuration["Redis:ConnectionString"]);
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"]);
+
+builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConnectionString);
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
