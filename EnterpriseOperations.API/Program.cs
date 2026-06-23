@@ -20,7 +20,7 @@ builder.Services.AddScoped<IOperationTaskRepository, OperationTaskRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var redisConnectionString = builder.Configuration["Redis:ConnectionString"]);
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
 
 builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConnectionString);
 
