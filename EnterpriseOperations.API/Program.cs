@@ -3,6 +3,7 @@ using EnterpriseOperations.Application.Services;
 using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Caching;
+using EnterpriseOperations.Infrastructure.ExternalServices;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,13 @@ builder.Services.AddStackExchangeRedisCache(options => options.Configuration = r
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(client => 
+{
+    var baseUrl = builder.Configuration["ExternalSystems:OperationsApiBaseUrl"];
+
+    client.BaseAddress = new Uri(baseUrl!);
+});
 
 var app = builder.Build();
 
