@@ -6,6 +6,7 @@ using EnterpriseOperations.Infrastructure.Caching;
 using EnterpriseOperations.Infrastructure.ExternalServices;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http.Resilience;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,12 +30,20 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(client => 
+builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(client =>
 {
     var baseUrl = builder.Configuration["ExternalSystems:OperationsApiBaseUrl"];
 
     client.BaseAddress = new Uri(baseUrl!);
-    client.Timeout = TimeSpan.FromSeconds(3);
+})
+.AddStandardResilienceHandler(options => 
+{
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(5);
+
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(2);
+
+    options.Retry.MaxRetryAttempts = 2;
+    options.Retry.Delay = TimeSpan.FromMilliseconds(500);
 });
 
 var app = builder.Build();
