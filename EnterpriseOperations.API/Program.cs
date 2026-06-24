@@ -34,6 +34,7 @@ builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(cl
     var baseUrl = builder.Configuration["ExternalSystems:OperationsApiBaseUrl"];
 
     client.BaseAddress = new Uri(baseUrl!);
+    client.Timeout = TimeSpan.FromSeconds(3);
 });
 
 var app = builder.Build();

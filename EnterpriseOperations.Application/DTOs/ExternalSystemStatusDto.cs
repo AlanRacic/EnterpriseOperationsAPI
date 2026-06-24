@@ -9,6 +9,6 @@ namespace EnterpriseOperations.Application.DTOs
         public string SystemName { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime CheckedAt { get; set; }
-        public string Source { get; set; }
+        public string Source { get; set; } = string.Empty;
     }
 }
