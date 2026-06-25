@@ -17,5 +17,11 @@ namespace EnterpriseOperations.API.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        [HttpGet("error")]
+        public IActionResult ThrowError() 
+        {
+            throw new InvalidOperationException("Test exception for global error handling.");
+        }
     }
 }

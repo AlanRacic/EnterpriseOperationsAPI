@@ -4,6 +4,7 @@ using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Caching;
 using EnterpriseOperations.Infrastructure.ExternalServices;
+using EnterpriseOperations.API.Middleware;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
@@ -46,7 +47,13 @@ builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(cl
     options.Retry.Delay = TimeSpan.FromMilliseconds(500);
 });
 
+builder.Services.AddProblemDetails();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope()) 
 {
