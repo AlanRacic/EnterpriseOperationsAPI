@@ -12,9 +12,12 @@ namespace EnterpriseOperations.API.Controllers
     {
         private readonly IOperationTaskService _operationTaskService;
 
-        public OperationTasksController(IOperationTaskService operationTaskService) 
+        private readonly ILogger<OperationTasksController> _logger;
+
+        public OperationTasksController(IOperationTaskService operationTaskService, ILogger<OperationTasksController> logger) 
         {
             _operationTaskService = operationTaskService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -36,10 +39,14 @@ namespace EnterpriseOperations.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) 
         {
+            _logger.LogInformation("Retrieving operation task with ID {TaskId}.", id);
+
             var task = await _operationTaskService.GetByIdAsync(id);
 
             if (task is null) 
             {
+                _logger.LogWarning("Operation task with ID {TaskId} was not found.", id);
+
                 return NotFound();
             }
 
@@ -49,7 +56,11 @@ namespace EnterpriseOperations.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateOperationTaskDto dto)
         {
+            _logger.LogInformation("Creating a new operation task with title {Title}.", dto.Title);
+
             var createdTask = await _operationTaskService.CreateAsync(dto);
+
+            _logger.LogInformation("Operation task with ID {TaskId} was created.", createdTask.Id);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -60,10 +71,14 @@ namespace EnterpriseOperations.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, UpdateOperationTaskDto dto) 
         {
+            _logger.LogInformation("Updating operation task with ID {TaskId}. IsComplete: {IsCompleted}", id, dto.IsCompleted);
+
             var updated = await _operationTaskService.UpdateAsync(id, dto);
 
             if (!updated) 
             {
+                _logger.LogWarning("Update failed because operation task with ID {TaskId} was not found.", id);
+
                 return NotFound();
             }
 
@@ -73,10 +88,14 @@ namespace EnterpriseOperations.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id) 
         {
+            _logger.LogInformation("Deleting operation task with ID {TaskId}.", id);
+
             var deleted = await _operationTaskService.DeleteAsync(id);
 
             if (!deleted)
             {
+                _logger.LogWarning("Delete failed because operation task with ID {TaskId} was not found.", id);
+
                 return NotFound();
             }
 
