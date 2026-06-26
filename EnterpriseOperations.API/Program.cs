@@ -4,9 +4,11 @@ using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Caching;
 using EnterpriseOperations.Infrastructure.ExternalServices;
+using EnterpriseOperations.Infrastructure.Identity;
 using EnterpriseOperations.API.Middleware;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Http.Resilience;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +53,8 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -69,7 +73,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
+app.MapIdentityApi<ApplicationUser>();
 
 app.MapControllers();
 
