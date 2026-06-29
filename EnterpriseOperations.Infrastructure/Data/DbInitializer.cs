@@ -1,5 +1,6 @@
 ﻿using EnterpriseOperations.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ namespace EnterpriseOperations.Infrastructure.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedAsync(AppDbContext context)
+        public static async Task SeedAsync(AppDbContext context, RoleManager<IdentityRole> roleManager)
         {
             await context.Database.MigrateAsync();
 
@@ -59,6 +60,16 @@ namespace EnterpriseOperations.Infrastructure.Data
                     CreatedAt = DateTime.UtcNow.AddDays(-i),
                     CompletedAt = isCompleted ? DateTime.UtcNow.AddDays(-i + 1) : null
                 });
+            }
+
+            var roles = new[] { "Admin", "Operator" };
+
+            foreach (var role in roles) 
+            {
+                if (!await roleManager.RoleExistsAsync(role)) 
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
             }
 
             await context.OperationTasks.AddRangeAsync(operationTasks);

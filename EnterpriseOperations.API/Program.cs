@@ -53,7 +53,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
 
 var app = builder.Build();
 
@@ -62,7 +62,9 @@ app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope()) 
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbInitializer.SeedAsync(dbContext);
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await DbInitializer.SeedAsync(dbContext, roleManager);
 }
 
 // Configure the HTTP request pipeline.
