@@ -3,9 +3,11 @@ using EnterpriseOperations.Application.Interfaces;
 using EnterpriseOperations.Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EnterpriseOperations.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OperationTasksController : ControllerBase
