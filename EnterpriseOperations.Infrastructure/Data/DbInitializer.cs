@@ -1,4 +1,5 @@
 ﻿using EnterpriseOperations.Domain.Entities;
+using EnterpriseOperations.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -9,9 +10,31 @@ namespace EnterpriseOperations.Infrastructure.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedAsync(AppDbContext context, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedAsync(AppDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
             await context.Database.MigrateAsync();
+
+            var roles = new[] { "Admin", "Operator" };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+
+            await SeedUserAsync(
+                userManager,
+                email: "admin@example.com",
+                password: "Admin123!",
+                role: "Admin");
+
+            await SeedUserAsync(
+                userManager,
+                email: "operator@example.com",
+                password: "Operator123!",
+                role: "Operator");
 
             if (await context.OperationTasks.AnyAsync()) 
             {
@@ -62,18 +85,32 @@ namespace EnterpriseOperations.Infrastructure.Data
                 });
             }
 
-            var roles = new[] { "Admin", "Operator" };
-
-            foreach (var role in roles) 
-            {
-                if (!await roleManager.RoleExistsAsync(role)) 
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-
             await context.OperationTasks.AddRangeAsync(operationTasks);
             await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedUserAsync(UserManager<ApplicationUser> userManager, string email, string password, string role)
+        {
+            var existingUser = await userManager.FindByEmailAsync(email);
+
+            if (existingUser is not null)
+            {
+                return;
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
         }
     }
 }
