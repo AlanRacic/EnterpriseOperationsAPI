@@ -6,6 +6,7 @@ using EnterpriseOperations.Infrastructure.Caching;
 using EnterpriseOperations.Infrastructure.ExternalServices;
 using EnterpriseOperations.Infrastructure.Identity;
 using EnterpriseOperations.API.Middleware;
+using EnterpriseOperations.Infrastructure.BackgroundJobs;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -77,6 +78,8 @@ builder.Services.AddOpenTelemetry()
 builder.Services.AddHangfire(configuration => configuration.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHangfireServer();
+
+builder.Services.AddScoped<ExternalSystemStatusJob>();
 
 var app = builder.Build();
 

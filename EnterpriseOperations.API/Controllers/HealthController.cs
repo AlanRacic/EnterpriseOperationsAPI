@@ -28,8 +28,7 @@ namespace EnterpriseOperations.API.Controllers
         [HttpPost("background-test")]
         public IActionResult EnqueueBackgroundTest() 
         {
-            BackgroundJob.Enqueue(() =>
-                Console.WriteLine("Background job executed from Enterprise Operations API."));
+            BackgroundJob.Enqueue(() => Console.WriteLine("Background job executed from Enterprise Operations API."));
 
             return Accepted(new { Message = "Background job has been enqueued." });
         }
