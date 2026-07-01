@@ -5,11 +5,14 @@ using EnterpriseOperations.Application.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace EnterpriseOperations.Application.Services
 {
     public class OperationTaskService : IOperationTaskService
     {
+        private static readonly ActivitySource ActivitySource = new("EnterpriseOperations.Application");
+
         private const string OperationTasksCacheVersionKey = "operation-tasks:version";
 
         private readonly IOperationTaskRepository _operationTaskRepository;
@@ -108,6 +111,14 @@ namespace EnterpriseOperations.Application.Services
 
         public async Task<PagedResult<OperationTaskDto>> GetPagedAsync(OperationTaskQueryParameters queryParameters)
         {
+            using var activity = ActivitySource.StartActivity("Get paged operation tasks");
+
+            activity?.SetTag("page.number", queryParameters.PageNumber);
+            activity?.SetTag("page.size", queryParameters.PageSize);
+            activity?.SetTag("filter.is_completed", queryParameters.IsCompleted);
+            activity?.SetTag("sort.by", queryParameters.SortBy);
+            activity?.SetTag("sort.direction", queryParameters.SortDirection);
+
             var cacheVersion = await _cacheService.GetVersionAsync(OperationTasksCacheVersionKey);
 
             var cacheKey =
@@ -123,8 +134,12 @@ namespace EnterpriseOperations.Application.Services
 
             if (cachedResult is not null)
             {
+                activity?.SetTag("cache.hit", true);
+
                 return cachedResult;
             }
+
+            activity?.SetTag("cache.hit", false);
 
             var pagedTasks = await _operationTaskRepository.GetPagedAsync(queryParameters);
 
