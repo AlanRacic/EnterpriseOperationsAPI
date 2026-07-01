@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Http.Resilience;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +74,10 @@ builder.Services.AddOpenTelemetry()
             .AddConsoleExporter();
     });
 
+builder.Services.AddHangfire(configuration => configuration.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -97,6 +102,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire");
 
 app.MapIdentityApi<ApplicationUser>();
 
