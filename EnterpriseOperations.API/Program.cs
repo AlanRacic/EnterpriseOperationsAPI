@@ -108,6 +108,8 @@ app.UseAuthorization();
 
 app.UseHangfireDashboard("/hangfire");
 
+RecurringJob.AddOrUpdate<ExternalSystemStatusJob>("external-system-status-check", job => job.CheckStatusAsync(), Cron.Hourly);
+
 app.MapIdentityApi<ApplicationUser>();
 
 app.MapControllers();
