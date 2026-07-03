@@ -71,7 +71,8 @@ namespace EnterpriseOperations.Application.Services
                 Title = dto.Title,
                 Description = dto.Description,
                 IsCompleted = dto.IsCompleted,
-                CompletedAt = dto.IsCompleted ? DateTime.UtcNow : null
+                CompletedAt = dto.IsCompleted ? DateTime.UtcNow : null,
+                RowVersion = Convert.FromBase64String(dto.RowVersion)
             };
 
             var updated = await _operationTaskRepository.UpdateAsync(operationTask);

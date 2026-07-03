@@ -50,6 +50,10 @@ namespace EnterpriseOperations.Infrastructure.Repositories
                 return false;
             }
 
+            _context.Entry(existingTask)
+                .Property(task => task.RowVersion)
+                .OriginalValue = operationTask.RowVersion;
+
             existingTask.Title = operationTask.Title;
             existingTask.Description = operationTask.Description;
             existingTask.IsCompleted = operationTask.IsCompleted;
