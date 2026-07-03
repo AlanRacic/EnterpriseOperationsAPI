@@ -9,5 +9,6 @@ namespace EnterpriseOperations.Application.DTOs
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public bool IsCompleted { get; set; }
+        public string RowVersion { get; set; } = string.Empty;
     }
 }

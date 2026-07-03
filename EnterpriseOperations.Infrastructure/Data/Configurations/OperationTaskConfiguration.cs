@@ -14,6 +14,8 @@ namespace EnterpriseOperations.Infrastructure.Data.Configurations
             builder.HasIndex(task => task.IsCompleted);
 
             builder.HasIndex(task => task.CreatedAt);
+
+            builder.Property(task => task.RowVersion).IsRowVersion();
         }
     }
 }

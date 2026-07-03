@@ -12,5 +12,6 @@ namespace EnterpriseOperations.Application.DTOs
         public bool IsCompleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public string RowVersion { get; set; } = string.Empty;
     }
 }

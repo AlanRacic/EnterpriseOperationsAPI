@@ -105,7 +105,8 @@ namespace EnterpriseOperations.Application.Services
                 Description = task.Description,
                 IsCompleted = task.IsCompleted,
                 CreatedAt = task.CreatedAt,
-                CompletedAt = task.CompletedAt
+                CompletedAt = task.CompletedAt,
+                RowVersion = Convert.ToBase64String(task.RowVersion)
             };
         }
 
