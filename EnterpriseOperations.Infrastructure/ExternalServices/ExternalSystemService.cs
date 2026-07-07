@@ -1,5 +1,8 @@
 ﻿using EnterpriseOperations.Application.DTOs;
 using EnterpriseOperations.Application.Interfaces;
+using EnterpriseOperations.Application.Settings;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,11 +15,13 @@ namespace EnterpriseOperations.Infrastructure.ExternalServices
 
         private readonly HttpClient _httpClient;
         private readonly ICacheService _cacheService;
+        private readonly CacheSettings _cacheSettings;
 
-        public ExternalSystemService(HttpClient httpClient, ICacheService cacheService) 
+        public ExternalSystemService(HttpClient httpClient, ICacheService cacheService, IOptions<CacheSettings> cacheOptions) 
         {
             _httpClient = httpClient;
             _cacheService = cacheService;
+            _cacheSettings = cacheOptions.Value;
         }
 
         public async Task<ExternalSystemStatusDto> GetStatusAsync()
@@ -38,7 +43,7 @@ namespace EnterpriseOperations.Infrastructure.ExternalServices
                 await _cacheService.SetAsync(
                     ExternalSystemStatusCacheKey,
                     status,
-                    TimeSpan.FromMinutes(10));
+                    TimeSpan.FromMinutes(_cacheSettings.ExternalSystemStatusExpirationMinutes));
 
                 return status;
             }

@@ -1,5 +1,6 @@
 using EnterpriseOperations.Application.Interfaces;
 using EnterpriseOperations.Application.Services;
+using EnterpriseOperations.Application.Settings;
 using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Caching;
@@ -45,12 +46,20 @@ builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(cl
 })
 .AddStandardResilienceHandler(options => 
 {
-    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(5);
+    var totalRequestTimeoutSeconds = builder.Configuration.GetValue<int>("ExternalSystems:TotalRequestTimeoutSeconds");
 
-    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(2);
+    var attemptTimeoutSeconds = builder.Configuration.GetValue<int>("ExternalSystems:AttemptTimeoutSeconds");
 
-    options.Retry.MaxRetryAttempts = 2;
-    options.Retry.Delay = TimeSpan.FromMilliseconds(500);
+    var retryDelayMiliseconds = builder.Configuration.GetValue<int>("ExternalSystems.RetryDelayMiliseconds");
+
+    var maxRetryAttempts = builder.Configuration.GetValue<int>("ExternalSystems:MaxRetryAttempts");
+
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(totalRequestTimeoutSeconds);
+
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(attemptTimeoutSeconds);
+
+    options.Retry.MaxRetryAttempts = maxRetryAttempts;
+    options.Retry.Delay = TimeSpan.FromMilliseconds(retryDelayMiliseconds);
 });
 
 builder.Services.AddProblemDetails();
@@ -80,6 +89,8 @@ builder.Services.AddHangfire(configuration => configuration.UseSqlServerStorage(
 builder.Services.AddHangfireServer();
 
 builder.Services.AddScoped<ExternalSystemStatusJob>();
+
+builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("Cache"));
 
 var app = builder.Build();
 

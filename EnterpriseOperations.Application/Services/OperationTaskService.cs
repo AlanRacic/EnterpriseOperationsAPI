@@ -2,6 +2,8 @@
 using EnterpriseOperations.Application.DTOs;
 using EnterpriseOperations.Domain.Entities;
 using EnterpriseOperations.Application.Models;
+using EnterpriseOperations.Application.Settings;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,12 +21,13 @@ namespace EnterpriseOperations.Application.Services
 
         private readonly ICacheService _cacheService;
 
-        public OperationTaskService(
-            IOperationTaskRepository operationTaskRepository,
-            ICacheService cacheService) 
+        private readonly CacheSettings _cacheSettings;
+
+        public OperationTaskService(IOperationTaskRepository operationTaskRepository, ICacheService cacheService, IOptions<CacheSettings> cacheOptions) 
         {
             _operationTaskRepository = operationTaskRepository;
             _cacheService = cacheService;
+            _cacheSettings = cacheOptions.Value;
         }
 
         public async Task<IEnumerable<OperationTaskDto>> GetAllAsync()
@@ -156,7 +159,7 @@ namespace EnterpriseOperations.Application.Services
             await _cacheService.SetAsync(
                 cacheKey,
                 result,
-                TimeSpan.FromMinutes(1));
+                TimeSpan.FromMinutes(_cacheSettings.OperationTasksPagedExpirationMinutes));
 
             return result;
         }
