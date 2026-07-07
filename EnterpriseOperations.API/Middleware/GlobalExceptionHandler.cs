@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseOperations.API.Middleware
 {
@@ -16,17 +17,28 @@ namespace EnterpriseOperations.API.Middleware
         {
             _logger.LogError(exception, "An unhandled exception occurred while processing the request.");
 
-            var problemDetails = new ProblemDetails
+            var problemDetails = exception switch
             {
+                DbUpdateConcurrencyException => new ProblemDetails
+                {
+                    Title = "Concurrency conflict.",
+                    Detail = "The record was modified by another user. Please reload the data and try again.",
+                    Status = StatusCodes.Status409Conflict,
+                    Instance = httpContext.Request.Path
+                },
+
+                _ => new ProblemDetails
+                {
                 Title = "An unexpected error occurred.",
                 Detail = "An internal server error occurred.",
                 Status = StatusCodes.Status500InternalServerError,
                 Instance = httpContext.Request.Path
+                }
             };
 
             problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
 
-            httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
 
             await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
