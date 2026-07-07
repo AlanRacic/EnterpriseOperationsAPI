@@ -50,7 +50,7 @@ builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(cl
 
     var attemptTimeoutSeconds = builder.Configuration.GetValue<int>("ExternalSystems:AttemptTimeoutSeconds");
 
-    var retryDelayMiliseconds = builder.Configuration.GetValue<int>("ExternalSystems:RetryDelayMilliseconds");
+    var retryDelayMilliseconds = builder.Configuration.GetValue<int>("ExternalSystems:RetryDelayMilliseconds");
 
     var maxRetryAttempts = builder.Configuration.GetValue<int>("ExternalSystems:MaxRetryAttempts");
 
@@ -60,7 +60,7 @@ builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(cl
 
     options.Retry.MaxRetryAttempts = maxRetryAttempts;
 
-    options.Retry.Delay = TimeSpan.FromMilliseconds(retryDelayMiliseconds);
+    options.Retry.Delay = TimeSpan.FromMilliseconds(retryDelayMilliseconds);
 });
 
 builder.Services.AddProblemDetails();
