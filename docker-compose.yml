@@ -4,3 +4,12 @@ services:
     build:
       context: .
       dockerfile: EnterpriseOperations.API/Dockerfile
+    depends_on:
+      - sqlserver
+      - redis
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
+  redis:
+    image: redis:latest
