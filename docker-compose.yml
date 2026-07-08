@@ -1,0 +1,6 @@
+services:
+  enterpriseoperations.api:
+    image: ${DOCKER_REGISTRY-}enterpriseoperationsapi
+    build:
+      context: .
+      dockerfile: EnterpriseOperations.API/Dockerfile
