@@ -1,14 +1,12 @@
 using EnterpriseOperations.Application.Interfaces;
 using EnterpriseOperations.Application.Services;
-using EnterpriseOperations.Application.Settings;
 using EnterpriseOperations.Infrastructure.Repositories;
 using EnterpriseOperations.Infrastructure.Data;
-using EnterpriseOperations.Infrastructure.Caching;
 using EnterpriseOperations.Infrastructure.ExternalServices;
 using EnterpriseOperations.Infrastructure.Identity;
 using EnterpriseOperations.API.Middleware;
 using EnterpriseOperations.Infrastructure.BackgroundJobs;
-using StackExchange.Redis;
+using EnterpriseOperations.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Http.Resilience;
@@ -29,14 +27,6 @@ builder.Services.AddScoped<IOperationTaskService, OperationTaskService>();
 builder.Services.AddScoped<IOperationTaskRepository, OperationTaskRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
-
-builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConnectionString);
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
-
-builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 builder.Services.AddHttpClient<IExternalSystemService, ExternalSystemService>(client =>
 {
@@ -91,7 +81,7 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddScoped<ExternalSystemStatusJob>();
 
-builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("Cache"));
+builder.Services.AddCacheProvider(builder.Configuration);
 
 var app = builder.Build();
 
