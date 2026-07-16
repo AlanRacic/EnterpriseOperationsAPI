@@ -34,8 +34,4 @@
     <ProjectReference Include="..\EnterpriseOperations.Infrastructure\EnterpriseOperations.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>
