@@ -3,6 +3,8 @@ using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Identity;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace EnterpriseOperations.API.Extensions
 {
@@ -43,6 +45,24 @@ namespace EnterpriseOperations.API.Extensions
                 Cron.Hourly);
 
             app.MapIdentityApi<ApplicationUser>();
+
+            app.MapHealthChecks(
+                "/health/live",
+                new HealthCheckOptions
+                {
+                    Predicate = _ => false
+                })
+                .AllowAnonymous();
+
+            app.MapHealthChecks(
+                "/health/ready",
+                new HealthCheckOptions
+                {
+                    Predicate = healthCheck =>
+                        healthCheck.Tags.Contains("ready")
+                })
+                .AllowAnonymous();
+
             app.MapControllers();
 
             return app;

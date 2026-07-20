@@ -1,4 +1,5 @@
 ﻿using EnterpriseOperations.API.Middleware;
+using EnterpriseOperations.Infrastructure.Data;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -14,12 +15,14 @@ namespace EnterpriseOperations.API.Extensions
             services.AddProblemDetails();
             services.AddExceptionHandler<GlobalExceptionHandler>();
 
+            services
+                .AddHealthChecks()
+                .AddDbContextCheck<AppDbContext>(name: "sql-database", tags: ["ready"]);
+
             services.AddOpenTelemetry()
                 .ConfigureResource(resource =>
             {
-                resource.AddService(
-                    serviceName: "EnterpriseOperations.API",
-                    serviceVersion: "1.0.0");
+                resource.AddService(serviceName: "EnterpriseOperations.API", serviceVersion: "1.0.0");
             })
                 .WithTracing(tracing =>
                 {
