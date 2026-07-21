@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="../EnterpriseOperations.UnitTests/EnterpriseOperations.UnitTests.csproj" Id="0d3ee5bc-886e-41b2-b59b-eebf1cb63a54" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
