@@ -35,6 +35,8 @@ namespace EnterpriseOperations.UnitTests.Services
                 cacheSettings);
         }
 
+        #region GetByIdAsync Tests
+
         [Fact]
         public async Task GetByIdAsync_WhenTaskExists_ReturnsTaskDto()
         {
@@ -85,6 +87,10 @@ namespace EnterpriseOperations.UnitTests.Services
             _repositoryMock.Verify(repository => repository.GetByIdAsync(999), Times.Once);
         }
 
+        #endregion
+
+        #region CreateAsync Tests
+
         [Fact]
         public async Task CreateAsync_WhenDataIsValid_CreatesTaskAndInvalidatesCache() 
         {
@@ -133,6 +139,10 @@ namespace EnterpriseOperations.UnitTests.Services
 
             _cacheServiceMock.Verify(cache => cache.IncrementVersionAsync("operation-tasks:version"), Times.Once);
         }
+
+        #endregion
+
+        #region UpdateAsync Tests
 
         [Fact]
         public async Task UpdateAsync_WhenUpdateSucceeds_UpdatesTaskAndInvalidatesCache() 
@@ -188,7 +198,7 @@ namespace EnterpriseOperations.UnitTests.Services
             var updateDto = new UpdateOperationTaskDto
             {
                 Title = "Continue monthly report",
-                Description = "The report still requires addtional data.",
+                Description = "The report still requires additional data.",
                 IsCompleted = false,
                 RowVersion = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
             };
@@ -262,5 +272,49 @@ namespace EnterpriseOperations.UnitTests.Services
 
             _cacheServiceMock.Verify(cache => cache.IncrementVersionAsync(It.IsAny<string>()), Times.Never);
         }
+
+        #endregion
+
+        #region DeleteAsync Tests
+
+        [Fact]
+        public async Task DeleteAsync_WhenDeleteSucceeds_InvalidatesCacheAndReturnsTrue()
+        {
+            // Arrange
+            _repositoryMock
+                .Setup(repository => repository.DeleteAsync(25))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.DeleteAsync(25);
+
+            // Assert
+            Assert.True(result);
+
+            _repositoryMock.Verify(repository => repository.DeleteAsync(25), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.IncrementVersionAsync("operation-tasks:version"), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenDeleteFails_DoesNotInvalidateCacheAndReturnsFalse()
+        {
+            // Arrange
+            _repositoryMock
+                .Setup(repository => repository.DeleteAsync(999))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.DeleteAsync(999);
+
+            // Assert
+            Assert.False(result);
+
+            _repositoryMock.Verify(repository => repository.DeleteAsync(999), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.IncrementVersionAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        #endregion
     }
 }
