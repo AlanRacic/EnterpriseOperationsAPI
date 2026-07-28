@@ -6,6 +6,7 @@
     <Project Path="EnterpriseOperations.Infrastructure/EnterpriseOperations.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="tests/EnterpriseOperations.IntegrationTests/EnterpriseOperations.IntegrationTests.csproj" Id="6d468e24-6369-4aa8-8c8f-71d13ffc04e2" />
     <Project Path="tests/EnterpriseOperations.UnitTests/EnterpriseOperations.UnitTests.csproj" />
   </Folder>
   <Project Path="docker-compose.dcproj">
