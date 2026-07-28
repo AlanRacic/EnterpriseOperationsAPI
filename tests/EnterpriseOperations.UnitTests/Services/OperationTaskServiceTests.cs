@@ -467,7 +467,7 @@ namespace EnterpriseOperations.UnitTests.Services
 
             // Assert
             Assert.Equal(1, result.PageNumber);
-            Assert.Equal(19, result.PageSize);
+            Assert.Equal(10, result.PageSize);
             Assert.Equal(1, result.TotalCount);
 
             var item = Assert.Single(result.Items);
@@ -557,7 +557,7 @@ namespace EnterpriseOperations.UnitTests.Services
             Assert.Contains("pageNumber=2", capturedCacheKeys[1]);
             Assert.Contains("pageSize=5", capturedCacheKeys[1]);
             Assert.Contains("isCompleted=True", capturedCacheKeys[1]);
-            Assert.Contains("searhTerm=supplier", capturedCacheKeys[1]);
+            Assert.Contains("searchTerm=supplier", capturedCacheKeys[1]);
             Assert.Contains("sortBy=title", capturedCacheKeys[1]);
             Assert.Contains("sortDirection=asc", capturedCacheKeys[1]);
 
