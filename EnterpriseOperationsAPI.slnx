@@ -1,10 +1,14 @@
 <Solution>
+  <Folder Name="/Src/">
+    <Project Path="EnterpriseOperations.API/EnterpriseOperations.API.csproj" />
+    <Project Path="EnterpriseOperations.Application/EnterpriseOperations.Application.csproj" />
+    <Project Path="EnterpriseOperations.Domain/EnterpriseOperations.Domain.csproj" />
+    <Project Path="EnterpriseOperations.Infrastructure/EnterpriseOperations.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/EnterpriseOperations.UnitTests/EnterpriseOperations.UnitTests.csproj" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
-  <Project Path="EnterpriseOperations.API/EnterpriseOperations.API.csproj" />
-  <Project Path="EnterpriseOperations.Application/EnterpriseOperations.Application.csproj" />
-  <Project Path="EnterpriseOperations.Domain/EnterpriseOperations.Domain.csproj" />
-  <Project Path="EnterpriseOperations.Infrastructure/EnterpriseOperations.Infrastructure.csproj" />
-  <Project Path="tests/EnterpriseOperations.UnitTests/EnterpriseOperations.UnitTests.csproj" />
 </Solution>
