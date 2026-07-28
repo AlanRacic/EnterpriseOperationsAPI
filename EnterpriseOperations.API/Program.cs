@@ -16,3 +16,4 @@ await app.InitializeDatabaseAsync();
 app.ConfigureApiPipeline();
 
 app.Run();
+public partial class Program;
