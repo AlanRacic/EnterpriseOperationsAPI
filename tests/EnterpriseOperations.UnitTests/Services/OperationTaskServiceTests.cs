@@ -1,13 +1,11 @@
 ﻿using EnterpriseOperations.Application.DTOs;
 using EnterpriseOperations.Application.Interfaces;
+using EnterpriseOperations.Application.Models;
 using EnterpriseOperations.Application.Services;
 using EnterpriseOperations.Application.Settings;
 using EnterpriseOperations.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.UnitTests.Services
 {
@@ -313,6 +311,186 @@ namespace EnterpriseOperations.UnitTests.Services
             _repositoryMock.Verify(repository => repository.DeleteAsync(999), Times.Once);
 
             _cacheServiceMock.Verify(cache => cache.IncrementVersionAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        #endregion
+
+        #region GetPagedAsyncTests
+
+        [Fact]
+        public async Task GetPagedAsync_WhenCachedResultExists_ReturnsCachedResultWithoutCallingRepository()
+        {
+            // Arrange
+            var queryParameters = new OperationTaskQueryParameters
+            {
+                PageNumber = 2,
+                PageSize = 5,
+                IsCompleted = true,
+                SearchTerm = "report",
+                SortBy = "createdAt",
+                SortDirection = "desc"
+            };
+
+            var cachedResult = new PagedResult<OperationTaskDto>
+            {
+                Items =
+                [
+                    new OperationTaskDto
+                    {
+                        Id = 1,
+                        Title = "Cached report task",
+                        Description = "Returned from cache.",
+                        IsCompleted = true,
+                        CreatedAt = DateTime.UtcNow,
+                        RowVersion = Convert.ToBase64String([1, 2, 3, 4])
+                    }
+                    ],
+                PageNumber = 2,
+                PageSize = 5,
+                TotalCount = 6
+            };
+
+            const int cacheVersion = 3;
+
+            var expectedCacheKey =
+                "operation-tasks:paged:v3:" +
+                "pageNumber=2:" +
+                "pageSize=5:" +
+                "isCompleted=True:" +
+                "searchTerm=report:" +
+                "sortBy=createdAt:" +
+                "sortDirection=desc";
+
+            _cacheServiceMock
+                .Setup(cache => cache.GetVersionAsync("operation-tasks:version"))
+                .ReturnsAsync(cacheVersion);
+
+            _cacheServiceMock
+                .Setup(cache => cache.GetAsync<PagedResult<OperationTaskDto>>(expectedCacheKey))
+                .ReturnsAsync(cachedResult);
+
+            // Act
+            var result = await _service.GetPagedAsync(queryParameters);
+
+            // Assert
+            Assert.Same(cachedResult, result);
+
+            _cacheServiceMock.Verify(cache => cache.GetVersionAsync("operation-tasks:version"), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.GetAsync<PagedResult<OperationTaskDto>>(expectedCacheKey), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.SetAsync(
+                It.IsAny<string>(),
+                It.IsAny<PagedResult<OperationTaskDto>>(),
+                It.IsAny<TimeSpan>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task GetPagedAsync_WhenCacheMisses_ReturnsRepositoryResultAndStoresItInCache()
+        {
+            // Arrange
+            var queryParameters = new OperationTaskQueryParameters
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                IsCompleted = false,
+                SearchTerm = "supplier",
+                SortBy = "title",
+                SortDirection = "asc"
+            };
+
+            var createdAt = DateTime.UtcNow;
+
+            var repositoryResult = new PagedResult<OperationTask>
+            {
+                Items =
+                [
+                    new OperationTask
+                    {
+                        Id = 11,
+                        Title = "Review supplier contract",
+                        Description = "Review the current supplier agreement.",
+                        IsCompleted = false,
+                        CreatedAt = createdAt,
+                        CompletedAt = null,
+                        RowVersion = [5, 6, 7, 8]
+                    }
+                ],
+                PageNumber = 1,
+                PageSize = 10,
+                TotalCount = 1
+            };
+
+            const int cacheVersion = 4;
+
+            var expectedCacheKey =
+                "operation-tasks:paged:v4:" +
+                "pageNumber=1:" +
+                "pageSize=10:" +
+                "isCompleted=False:" +
+                "searchTerm=supplier:" +
+                "sortBy=title:" +
+                "sortDirection=asc";
+
+            _cacheServiceMock
+                .Setup(cache => cache.GetVersionAsync("operation-tasks:version"))
+                .ReturnsAsync(cacheVersion);
+
+            _cacheServiceMock
+                .Setup(cache =>
+                cache.GetAsync<PagedResult<OperationTaskDto>>(expectedCacheKey))
+                .ReturnsAsync((PagedResult<OperationTaskDto>?)null);
+
+            _repositoryMock
+                .Setup(repository => repository.GetPagedAsync(queryParameters))
+                .ReturnsAsync(repositoryResult);
+
+            PagedResult<OperationTaskDto>? cachedResult = null;
+            TimeSpan? capturedExpiration = null;
+
+            _cacheServiceMock
+                .Setup(cache => cache.SetAsync(
+                    expectedCacheKey,
+                    It.IsAny<PagedResult<OperationTaskDto>>(),
+                    It.IsAny<TimeSpan>()))
+                .Callback<string, PagedResult<OperationTaskDto>, TimeSpan>(
+                (_, result, expiration) =>
+                {
+                    cachedResult = result;
+                    capturedExpiration = expiration;
+                })
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _service.GetPagedAsync(queryParameters);
+
+            // Assert
+            Assert.Equal(1, result.PageNumber);
+            Assert.Equal(19, result.PageSize);
+            Assert.Equal(1, result.TotalCount);
+
+            var item = Assert.Single(result.Items);
+
+            Assert.Equal(11, item.Id);
+            Assert.Equal("Review supplier contract", item.Title);
+            Assert.Equal("Review the current supplier agreement.", item.Description);
+            Assert.False(item.IsCompleted);
+            Assert.Equal(createdAt, item.CreatedAt);
+            Assert.Null(item.CompletedAt);
+            Assert.Equal(Convert.ToBase64String([5, 6, 7, 8]), item.RowVersion);
+
+            Assert.NotNull(cachedResult);
+            Assert.Same(result, cachedResult);
+            Assert.Equal(TimeSpan.FromMinutes(1), capturedExpiration);
+
+            _cacheServiceMock.Verify(cache => cache.GetVersionAsync("operation-tasks:version"), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.GetAsync<PagedResult<OperationTaskDto>>(expectedCacheKey), Times.Once);
+
+            _repositoryMock.Verify(repository => repository.GetPagedAsync(queryParameters), Times.Once);
+
+            _cacheServiceMock.Verify(cache => cache.SetAsync(expectedCacheKey, result, TimeSpan.FromMinutes(1)), Times.Once);
         }
 
         #endregion
