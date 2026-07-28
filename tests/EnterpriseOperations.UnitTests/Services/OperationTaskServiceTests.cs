@@ -493,6 +493,83 @@ namespace EnterpriseOperations.UnitTests.Services
             _cacheServiceMock.Verify(cache => cache.SetAsync(expectedCacheKey, result, TimeSpan.FromMinutes(1)), Times.Once);
         }
 
+        [Fact]
+        public async Task GetPagedAsync_WhenQueryParametersDiffer_UsesDifferentCacheKeys()
+        {
+            // Arrange
+            var firstQuery = new OperationTaskQueryParameters
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                IsCompleted = false,
+                SearchTerm = "report",
+                SortBy = "createdAt",
+                SortDirection = "desc"
+            };
+
+            var secondQuery = new OperationTaskQueryParameters
+            {
+                PageNumber = 2,
+                PageSize = 5,
+                IsCompleted = true,
+                SearchTerm = "supplier",
+                SortBy = "title",
+                SortDirection = "asc"
+            };
+
+            _cacheServiceMock
+                .Setup(cache => cache.GetVersionAsync("operation-tasks:version"))
+                .ReturnsAsync(7);
+
+            var capturedCacheKeys = new List<string>();
+
+            _cacheServiceMock
+                .Setup(cache => cache.GetAsync<PagedResult<OperationTaskDto>>(It.IsAny<string>()))
+                .Callback<string>(key => capturedCacheKeys.Add(key))
+                .ReturnsAsync((PagedResult<OperationTaskDto>?)null);
+
+            _repositoryMock
+                .Setup(repository => repository.GetPagedAsync(It.IsAny<OperationTaskQueryParameters>()))
+                .ReturnsAsync((OperationTaskQueryParameters query) =>
+                    new PagedResult<OperationTask>
+                    {
+                        Items = [],
+                        PageNumber = query.PageNumber,
+                        PageSize = query.PageSize,
+                        TotalCount = 0
+                    });
+
+            // Act
+            await _service.GetPagedAsync(firstQuery);
+            await _service.GetPagedAsync(secondQuery);
+
+            // Assert
+            Assert.Equal(2, capturedCacheKeys.Count);
+            Assert.NotEqual(capturedCacheKeys[0], capturedCacheKeys[1]);
+
+            Assert.Contains("pageNumber=1", capturedCacheKeys[0]);
+            Assert.Contains("pageSize=10", capturedCacheKeys[0]);
+            Assert.Contains("isCompleted=False", capturedCacheKeys[0]);
+            Assert.Contains("searchTerm=report", capturedCacheKeys[0]);
+            Assert.Contains("sortBy=createdAt", capturedCacheKeys[0]);
+            Assert.Contains("sortDirection=desc", capturedCacheKeys[0]);
+
+            Assert.Contains("pageNumber=2", capturedCacheKeys[1]);
+            Assert.Contains("pageSize=5", capturedCacheKeys[1]);
+            Assert.Contains("isCompleted=True", capturedCacheKeys[1]);
+            Assert.Contains("searhTerm=supplier", capturedCacheKeys[1]);
+            Assert.Contains("sortBy=title", capturedCacheKeys[1]);
+            Assert.Contains("sortDirection=asc", capturedCacheKeys[1]);
+
+            _repositoryMock.Verify(repository => repository.GetPagedAsync(It.IsAny<OperationTaskQueryParameters>()), Times.Exactly(2));
+
+            _cacheServiceMock.Verify(cache => cache.SetAsync(
+                It.IsAny<string>(),
+                It.IsAny<PagedResult<OperationTaskDto>>(),
+                TimeSpan.FromMinutes(1)),
+                Times.Exactly(2));
+        }
+
         #endregion
     }
 }
