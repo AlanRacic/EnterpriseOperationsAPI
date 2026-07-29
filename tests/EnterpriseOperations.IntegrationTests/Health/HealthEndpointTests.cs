@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using EnterpriseOperations.IntegrationTests.Infrastructure;
 using System.Net;
 
 namespace EnterpriseOperations.IntegrationTests.Health
@@ -9,7 +9,7 @@ namespace EnterpriseOperations.IntegrationTests.Health
         public async Task GetLiveHealthEndpoint_ReturnsOk()
         {
             // Arrange
-            await using var factory = new WebApplicationFactory<Program>();
+            await using var factory = new CustomWebApplicationFactory();
 
             var client = factory.CreateClient();
 
