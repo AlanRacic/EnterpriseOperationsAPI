@@ -1,23 +1,30 @@
 ﻿using EnterpriseOperations.IntegrationTests.Infrastructure;
 using System.Net;
 
-namespace EnterpriseOperations.IntegrationTests.Health
+namespace EnterpriseOperations.IntegrationTests.Health;
+
+[Collection(IntegrationTestCollection.Name)]
+public class HealthEndpointTests
 {
-    public class HealthEndpointTests
+    private readonly MsSqlContainerFixture _sqlFixture;
+
+    public HealthEndpointTests(MsSqlContainerFixture sqlFixture)
     {
-        [Fact]
-        public async Task GetLiveHealthEndpoint_ReturnsOk()
-        {
-            // Arrange
-            await using var factory = new CustomWebApplicationFactory();
+        _sqlFixture = sqlFixture;
+    }
 
-            var client = factory.CreateClient();
+    [Fact]
+    public async Task GetLiveHealthEndpoint_ReturnsOk()
+    {
+        // Arrange
+        await using var factory = new CustomWebApplicationFactory(_sqlFixture.ConnectionString);
 
-            // Act
-            var response = await client.GetAsync("/health/live");
+        var client = factory.CreateClient();
 
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
+        // Act
+        var response = await client.GetAsync("/health/live");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 }
