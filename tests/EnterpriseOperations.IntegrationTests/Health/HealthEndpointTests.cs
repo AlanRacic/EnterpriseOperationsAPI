@@ -27,4 +27,19 @@ public class HealthEndpointTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetReadyHealthEndpoint_ReturnsOk_WhenDatabaseIsAvailable() 
+    {
+        // Arrange
+        await using var factory = new CustomWebApplicationFactory(_sqlFixture.ConnectionString);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/health/ready");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 }
