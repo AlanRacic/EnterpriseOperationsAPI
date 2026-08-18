@@ -14,7 +14,10 @@ namespace EnterpriseOperations.IntegrationTests.Infrastructure
             {
                 var testConfiguration = new Dictionary<string, string?>
                 {
-                    ["Cache:Provider"] = "Memory"
+                    ["Cache:Provider"] = "Memory",
+                    ["BackgroundJobs:Enabled"] = "false",
+                    ["Database:ApplyMigrationsOnStartup"] = "false",
+                    ["Database:SeedDevelopmentData"] = "false"
                 };
 
                 configurationBuilder.AddInMemoryCollection(testConfiguration);

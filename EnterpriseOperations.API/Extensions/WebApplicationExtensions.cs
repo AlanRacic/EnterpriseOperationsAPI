@@ -3,6 +3,7 @@ using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Identity;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -12,15 +13,32 @@ namespace EnterpriseOperations.API.Extensions
     {
         public static async Task InitializeDatabaseAsync(this WebApplication app) 
         {
-            using var scope = app.Services.CreateScope();
+            await using var scope = app.Services.CreateAsyncScope();
+
+            var applyMigrations = app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
+
+            var seedDevelopmentData = app.Configuration.GetValue<bool>("Database:SeedDevelopmentData");
+
+            if (!applyMigrations && !seedDevelopmentData)
+            {
+                return;
+            }
 
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            if (applyMigrations)
+            {
+                await dbContext.Database.MigrateAsync();
+            }
 
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            if (seedDevelopmentData) 
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            await DbInitializer.SeedAsync(dbContext, roleManager, userManager);
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                await DbInitializer.SeedDevelopmentDataAsync(dbContext, roleManager, userManager);
+            }  
         }
 
         public static WebApplication ConfigureApiPipeline(this WebApplication app) 
@@ -37,13 +55,16 @@ namespace EnterpriseOperations.API.Extensions
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseHangfireDashboard("/hangfire");
+            if (app.Configuration.GetValue<bool>("BackgroundJobs:Enabled")) 
+            {
+                app.UseHangfireDashboard("/hangfire");
 
-            RecurringJob.AddOrUpdate<ExternalSystemStatusJob>(
-                "external-system-status-check",
-                job => job.CheckStatusAsync(),
-                Cron.Hourly);
-
+                RecurringJob.AddOrUpdate<ExternalSystemStatusJob>(
+                    "external-system-status-check",
+                    job => job.CheckStatusAsync(),
+                    Cron.Hourly);
+            }
+            
             app.MapIdentityApi<ApplicationUser>();
 
             app.MapHealthChecks(

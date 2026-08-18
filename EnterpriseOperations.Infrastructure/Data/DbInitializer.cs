@@ -10,10 +10,8 @@ namespace EnterpriseOperations.Infrastructure.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedAsync(AppDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public static async Task SeedDevelopmentDataAsync(AppDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
-            await context.Database.MigrateAsync();
-
             var roles = new[] { "Admin", "Operator" };
 
             foreach (var role in roles)
@@ -71,7 +69,7 @@ namespace EnterpriseOperations.Infrastructure.Data
                 "Prepare a summary of data quality issues for review."
             };
 
-            for (int i = 1; i < 150; i++)
+            for (int i = 1; i <= 150; i++)
             {
                 var isCompleted = i % 3 == 0;
 

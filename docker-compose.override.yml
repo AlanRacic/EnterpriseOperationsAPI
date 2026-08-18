@@ -3,9 +3,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - Cache__Provider=Redis
+      - BackgroundJobs__Enabled=true
+      - Database__ApplyMigrationsOnStartup=true
+      - Database__SeedDevelopmentData=true
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EnterpriseOperationsDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;
       - Redis__ConnectionString=redis:6379,abortConnect=false
-      - Cache__Provider=Redis
       - ExternalSystems__OperationsApiBaseUrl=https://httpstat.us
     ports:
       - "8080:8080"

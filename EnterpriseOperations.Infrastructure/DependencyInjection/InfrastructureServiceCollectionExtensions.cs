@@ -21,7 +21,11 @@ namespace EnterpriseOperations.Infrastructure.DependencyInjection
             services.AddCacheProvider(configuration);
             services.AddExternalServices(configuration);
             services.AddIdentityServices();
-            services.AddBackgroundJobs(configuration);
+
+            if (configuration.GetValue<bool>("BackgroundJobs:Enabled")) 
+            {
+                services.AddBackgroundJobs(configuration);
+            }
 
             return services;
         }
@@ -47,7 +51,7 @@ namespace EnterpriseOperations.Infrastructure.DependencyInjection
             services
                 .AddHttpClient<IExternalSystemService, ExternalSystemService>(client =>
                 {
-                    var baseUrl = configuration["ExternalSystem:OperationsApiBaseUrl"] ?? throw new InvalidOperationException("The external system base URL is missing.");
+                    var baseUrl = configuration["ExternalSystems:OperationsApiBaseUrl"] ?? throw new InvalidOperationException("The external system base URL is missing.");
 
                     client.BaseAddress = new Uri(baseUrl);
                 })
