@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using EnterpriseOperations.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EnterpriseOperations.IntegrationTests.Infrastructure;
 
@@ -44,5 +47,35 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             configurationBuilder.AddInMemoryCollection(testConfiguration);
         });
+    }
+
+    public async Task CreateUserAsync(string email, string password)
+    {
+        using var scope = Services.CreateScope();
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var existingUser = await userManager.FindByEmailAsync(email);
+
+        if (existingUser is not null)
+        {
+            return;
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(error => error.Description));
+
+            throw new InvalidOperationException($"Could not create integration test user: {errors}");
+        }
     }
 }
