@@ -33,12 +33,12 @@ public class RoleAuthorizationTests
 
         var client = factory.CreateClient();
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         // Act
-        var response = await client.DeleteAsync("/api/OperationTasks/1");
+        var response = await client.DeleteAsync("/api/OperationTasks/1", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
@@ -58,7 +58,7 @@ public class RoleAuthorizationTests
 
         var client = factory.CreateClient();
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -68,16 +68,16 @@ public class RoleAuthorizationTests
             Description = "Created by the integration test."
         };
 
-        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto);
+        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(createdTask);
 
         // Act
-        var deleteResponse = await client.DeleteAsync($"/api/OperationTasks/{createdTask.Id}");
+        var deleteResponse = await client.DeleteAsync($"/api/OperationTasks/{createdTask.Id}", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);

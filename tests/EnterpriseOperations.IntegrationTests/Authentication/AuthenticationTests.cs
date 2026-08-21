@@ -39,12 +39,12 @@ public class AuthenticationTests
         };
 
         // Act - Login
-        var loginResponse = await client.PostAsJsonAsync("/login?useCookies=false", loginRequest);
+        var loginResponse = await client.PostAsJsonAsync("/login?useCookies=false", loginRequest, TestContext.Current.CancellationToken);
 
         // Assert Login
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
 
-        var tokenResponse = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var tokenResponse = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(tokenResponse);
         Assert.False(string.IsNullOrWhiteSpace(tokenResponse.AccessToken));
@@ -52,7 +52,7 @@ public class AuthenticationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
 
         // Act - protected request
-        var protectedResponse = await client.GetAsync("/api/OperationTasks");
+        var protectedResponse = await client.GetAsync("/api/OperationTasks", TestContext.Current.CancellationToken);
 
         // Assert protected request
         Assert.Equal(HttpStatusCode.OK, protectedResponse.StatusCode);

@@ -35,7 +35,7 @@ public class OperationTaskCrudTests
 
         await factory.CreateUserWithRoleAsync(email, password, "Admin");
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -46,11 +46,11 @@ public class OperationTaskCrudTests
         };
 
         // Act + Assert: CREATE
-        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto);
+        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(createdTask);
         Assert.True(createdTask.Id > 0);
@@ -60,11 +60,11 @@ public class OperationTaskCrudTests
         Assert.False(string.IsNullOrWhiteSpace(createdTask.RowVersion));
 
         // Act + Assert: GET
-        var getResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}");
+        var getResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
 
-        var fetchedTask = await getResponse.Content.ReadFromJsonAsync<OperationTaskDto>();
+        var fetchedTask = await getResponse.Content.ReadFromJsonAsync<OperationTaskDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(fetchedTask);
         Assert.Equal(createdTask.Id, fetchedTask.Id);
@@ -82,16 +82,16 @@ public class OperationTaskCrudTests
         };
 
         // Act + Assert: UPDATE
-        var updateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", updateDto);
+        var updateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", updateDto, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
 
         // Act + Assert: GET UPDATED
-        var updatedGetResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}");
+        var updatedGetResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, updatedGetResponse.StatusCode);
 
-        var updatedTask = await updatedGetResponse.Content.ReadFromJsonAsync<OperationTaskDto>();
+        var updatedTask = await updatedGetResponse.Content.ReadFromJsonAsync<OperationTaskDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(updatedTask);
 
@@ -105,12 +105,12 @@ public class OperationTaskCrudTests
         Assert.NotEqual(originalRowVersion, updatedTask.RowVersion);
 
         // Act + Assert: DELETE
-        var deleteResponse = await client.DeleteAsync($"/api/OperationTasks/{createdTask.Id}");
+        var deleteResponse = await client.DeleteAsync($"/api/OperationTasks/{createdTask.Id}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
         // Act + Assert: GET DELETED
-        var deletedGetResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}");
+        var deletedGetResponse = await client.GetAsync($"/api/OperationTasks/{createdTask.Id}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, deletedGetResponse.StatusCode);
     }

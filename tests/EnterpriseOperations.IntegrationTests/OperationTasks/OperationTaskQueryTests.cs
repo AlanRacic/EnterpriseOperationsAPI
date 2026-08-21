@@ -36,7 +36,7 @@ public class OperationTaskQueryTests
 
         await factory.CreateUserWithRoleAsync(email, password, "Admin");
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -63,7 +63,7 @@ public class OperationTaskQueryTests
 
         foreach (var task in tasks)
         {
-            var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", task);
+            var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", task, TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
         }
@@ -78,12 +78,13 @@ public class OperationTaskQueryTests
                 $"&isCompleted=false" +
                 $"&searchTerm={searchTerm}" +
                 $"&sortBy=title" +
-                $"&sortDirection=asc");
+                $"&sortDirection=asc",
+                TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<OperationTaskDto>>();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<OperationTaskDto>>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Equal(1, result.PageNumber);

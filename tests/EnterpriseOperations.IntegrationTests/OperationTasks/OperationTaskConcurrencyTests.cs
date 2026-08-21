@@ -35,7 +35,7 @@ public class OperationTaskConcurrencyTests
 
         await factory.CreateUserWithRoleAsync(email, password, "Admin");
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -45,11 +45,11 @@ public class OperationTaskConcurrencyTests
             Description = "Task used for concurrency integration testing."
         };
 
-        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto);
+        var createResponse = await client.PostAsJsonAsync("/api/OperationTasks", createDto, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<OperationTaskDto>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(createdTask);
 
@@ -66,7 +66,7 @@ public class OperationTaskConcurrencyTests
             RowVersion = originalRowVersion
         };
 
-        var firstUpdateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", firstUpdateDto);
+        var firstUpdateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", firstUpdateDto, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, firstUpdateResponse.StatusCode);
 
@@ -80,7 +80,7 @@ public class OperationTaskConcurrencyTests
         };
 
         // Act
-        var staleUpdateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", staleUpdateDto);
+        var staleUpdateResponse = await client.PutAsJsonAsync($"/api/OperationTasks/{createdTask.Id}", staleUpdateDto, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, staleUpdateResponse.StatusCode);

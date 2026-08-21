@@ -135,18 +135,19 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         }
     }
 
-    public async Task<string> LoginAsync(HttpClient client, string email, string password)
+    public async Task<string> LoginAsync(HttpClient client, string email, string password, CancellationToken cancellationToken)
     {
         var response = await client.PostAsJsonAsync("/login?useCookies=false",
             new
             {
                 email,
                 password
-            });
+            },
+            cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken);
 
         if (loginResponse is null || string.IsNullOrWhiteSpace(loginResponse.AccessToken))
         {

@@ -25,7 +25,7 @@ public class OperationTaskAuthorizationTests
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/OperationTasks");
+        var response = await client.GetAsync("/api/OperationTasks", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

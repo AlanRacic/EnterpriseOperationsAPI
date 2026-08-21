@@ -33,14 +33,14 @@ public class OperationTaskNotFoundTests
 
         await factory.CreateUserAsync(email, password);
 
-        var accessToken = await factory.LoginAsync(client, email, password);
+        var accessToken = await factory.LoginAsync(client, email, password, TestContext.Current.CancellationToken);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         const int nonExistingId = int.MaxValue;
 
         // Act
-        var response = await client.GetAsync($"/api/OperationTasks/{nonExistingId}");
+        var response = await client.GetAsync($"/api/OperationTasks/{nonExistingId}", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);

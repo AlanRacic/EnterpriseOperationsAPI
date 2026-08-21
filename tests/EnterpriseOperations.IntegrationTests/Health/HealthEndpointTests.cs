@@ -22,7 +22,7 @@ public class HealthEndpointTests
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health/live");
+        var response = await client.GetAsync("/health/live", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -37,7 +37,7 @@ public class HealthEndpointTests
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health/ready");
+        var response = await client.GetAsync("/health/ready", TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
