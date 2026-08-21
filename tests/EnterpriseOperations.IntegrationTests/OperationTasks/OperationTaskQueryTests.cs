@@ -86,7 +86,6 @@ public class OperationTaskQueryTests
         var result = await response.Content.ReadFromJsonAsync<PagedResult<OperationTaskDto>>();
 
         Assert.NotNull(result);
-
         Assert.Equal(1, result.PageNumber);
         Assert.Equal(2, result.PageSize);
         Assert.Equal(2, result.TotalCount);
