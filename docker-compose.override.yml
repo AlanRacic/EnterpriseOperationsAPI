@@ -7,7 +7,7 @@ services:
       - BackgroundJobs__Enabled=true
       - Database__ApplyMigrationsOnStartup=true
       - Database__SeedDevelopmentData=true
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EnterpriseOperationsDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EnterpriseOperationsDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;
       - Redis__ConnectionString=redis:6379,abortConnect=false
       - ExternalSystems__OperationsApiBaseUrl=https://httpstat.us
     ports:
@@ -19,7 +19,7 @@ services:
   sqlserver:
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=Your_password123
+      - SA_PASSWORD=${SQL_SA_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
