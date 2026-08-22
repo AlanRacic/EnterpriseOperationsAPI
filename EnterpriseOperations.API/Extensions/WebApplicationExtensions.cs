@@ -1,7 +1,9 @@
 ﻿using EnterpriseOperations.Infrastructure.BackgroundJobs;
 using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Identity;
+using EnterpriseOperations.API.Hangfire;
 using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -57,7 +59,10 @@ namespace EnterpriseOperations.API.Extensions
 
             if (app.Configuration.GetValue<bool>("BackgroundJobs:Enabled")) 
             {
-                app.UseHangfireDashboard("/hangfire");
+                app.UseHangfireDashboard("/hangfire", new DashboardOptions
+                {
+                    Authorization = [new HangfireDashboardAuthorizationFilter()]
+                });
 
                 RecurringJob.AddOrUpdate<ExternalSystemStatusJob>(
                     "external-system-status-check",
