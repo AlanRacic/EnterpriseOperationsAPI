@@ -3,11 +3,9 @@ using EnterpriseOperations.Infrastructure.Data;
 using EnterpriseOperations.Infrastructure.Identity;
 using EnterpriseOperations.API.Hangfire;
 using Hangfire;
-using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace EnterpriseOperations.API.Extensions
 {

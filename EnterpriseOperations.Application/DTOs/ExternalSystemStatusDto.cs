@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EnterpriseOperations.Application.DTOs
+﻿namespace EnterpriseOperations.Application.DTOs
 {
     public class ExternalSystemStatusDto
     {

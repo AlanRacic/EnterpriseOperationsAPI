@@ -1,8 +1,5 @@
 ﻿using EnterpriseOperations.IntegrationTests.Infrastructure;
 using System.Net;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.IntegrationTests.OperationTasks;
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EnterpriseOperations.Application.Interfaces
+﻿namespace EnterpriseOperations.Application.Interfaces
 {
     public interface ICacheService
     {

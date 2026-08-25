@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EnterpriseOperations.Application.Settings
+﻿namespace EnterpriseOperations.Application.Settings
 {
     public class CacheSettings
     {

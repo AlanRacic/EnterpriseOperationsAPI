@@ -1,8 +1,5 @@
 ﻿using EnterpriseOperations.Application.Models;
 using EnterpriseOperations.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.Application.Interfaces
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EnterpriseOperations.Application.Models
+﻿namespace EnterpriseOperations.Application.Models
 {
     public class PagedResult<T>
     {

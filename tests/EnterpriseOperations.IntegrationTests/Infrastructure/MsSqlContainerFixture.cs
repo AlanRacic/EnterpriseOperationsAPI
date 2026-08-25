@@ -1,7 +1,4 @@
 ﻿using Testcontainers.MsSql;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.IntegrationTests.Infrastructure
 {

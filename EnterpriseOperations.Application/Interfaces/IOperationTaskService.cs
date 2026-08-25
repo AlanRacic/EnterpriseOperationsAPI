@@ -1,8 +1,5 @@
 ﻿using EnterpriseOperations.Application.DTOs;
 using EnterpriseOperations.Application.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.Application.Interfaces
 {

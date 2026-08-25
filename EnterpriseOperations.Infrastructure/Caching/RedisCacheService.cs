@@ -2,9 +2,6 @@
 using EnterpriseOperations.Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.Infrastructure.Caching
 {

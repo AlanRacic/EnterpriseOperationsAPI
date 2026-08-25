@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EnterpriseOperations.Domain.Entities
+﻿namespace EnterpriseOperations.Domain.Entities
 {
     public class OperationTask
     {

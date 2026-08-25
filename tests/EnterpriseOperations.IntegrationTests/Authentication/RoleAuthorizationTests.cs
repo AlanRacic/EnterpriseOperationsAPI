@@ -3,9 +3,6 @@ using EnterpriseOperations.IntegrationTests.Infrastructure;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EnterpriseOperations.IntegrationTests.Authentication;
 
