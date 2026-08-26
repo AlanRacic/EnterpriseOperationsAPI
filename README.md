@@ -237,7 +237,7 @@ Images receive both `latest` and `sha-<full commit SHA>` tags. The SHA tag creat
 
 GHCR authentication uses GitHub's workflow-scoped `GITHUB_TOKEN` with `packages: write`; no separate registry PAT is stored.
 
-### Azure Deployment
+### Deployment Automation
 
 Deployment runs only after successful completion of the container-publishing workflow.
 
