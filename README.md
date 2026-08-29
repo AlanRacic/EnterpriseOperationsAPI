@@ -421,17 +421,7 @@ Azure RBAC grants the federated deployment identity the required Container Apps 
 
 `az containerapp update` then deploys the exact image tagged with the originating workflow's full commit SHA.
 
-This preserves traceability across the complete delivery chain:
-
-```text
-tested commit
-    ↓
-SHA-tagged container image
-    ↓
-OIDC-authenticated deployment
-    ↓
-Azure Container Apps
-```
+Using the originating commit SHA for both publishing and deployment preserves traceability from the tested source revision to the image running in Azure Container Apps.
 
 ---
 
@@ -444,20 +434,6 @@ The current cloud deployment uses:
 - **GitHub Container Registry** — container image registry;
 - **Microsoft Entra ID + GitHub OIDC** — deployment authentication;
 - **Azure RBAC** — deployment authorization.
-
-```text
-GitHub Actions
-      ↓
-GitHub OIDC
-      ↓
-Microsoft Entra ID
-      ↓
-Azure RBAC
-      ↓
-Azure Container Apps
-      ↓
-Azure SQL Database
-```
 
 Production configuration is supplied through Azure Container Apps environment variables and secret references.
 
